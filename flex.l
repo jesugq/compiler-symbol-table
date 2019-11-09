@@ -1,9 +1,17 @@
+%{
+#include <stdlib.h>
+#include "bison.tab.h"
+
+void left_value_integer();
+void left_value_floating();
+void left_value_string();
+%}
+
 ALPHA   [a-zA-Z]
 DIGIT   [0-9]
 MINUS   [~]
 
 %%
-
 "begin"     { return BEGINS; }
 "end"       { return ENDS; }
 "if"        { return IF; }
@@ -18,8 +26,8 @@ MINUS   [~]
 
 ":"         { return COLON; }
 ";"         { return SEMICOLON; }
-"("         { return LEFT_PARENTHESES; }
-")"         { return RIGHT_PARENTHESES; }
+"("         { return LEFT_PARENTHESIS; }
+")"         { return RIGHT_PARENTHESIS; }
 "+"         { return PLUS; };
 "-"         { return MINUS; };
 "*"         { return ASTERISK; };
@@ -29,21 +37,43 @@ MINUS   [~]
 "="         { return EQUALS; }
 "<="        { return LESS_THAN_EQUALS; }
 ">="        { return GREATER_THAN_EQUALS; }
+"<-"        { return ASSIGNMENT; }
 
 
 {MINUS}?{DIGIT}+ {
-    flex_assign_left_value();
+    left_value_integer();
     return INTEGER_TYPE;
 }
 {MINUS}?{DIGIT}*.{DIGIT}+ {
-    flex_assign_left_value();
+    left_value_floating();
     return FLOATING_TYPE;
 }
 {ALPHA}({ALPHA}|{DIGIT})* {
-    flex_assign_left_value();
+    left_value_string();
     return IDENTIFIER;
 }
-
 %%
 
-#include "lexicon.h"
+/*
+ * Assigns flex's left value the integer read.
+ */
+void left_value_integer() {
+    yylval.integer_value = atoi(yytext);
+}
+
+/*
+ * Assigns flex's left value the floating point read.
+ */
+void left_value_floating() {
+    yylval.floating_value = atof(yytext);
+}
+
+/*
+ * Assigns flex's left value the text read.
+ */
+void left_value_string() {
+    char * text = (char *)calloc(strlen(yytext+1), sizeof(char));
+    strcpy(text, yytext);
+
+    yylval.string_value = text;
+}
