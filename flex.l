@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include "bison.tab.h"
 
-int lines = 1;
+enum type { INTEGER_TYPE, FLOATING_TYPE };
 
-void left_value_integer();
-void left_value_floating();
+void left_value_type(int type);
 void left_value_string();
 %}
 
@@ -40,16 +39,16 @@ MINUS   [~]
 "<="        { return LESS_THAN_EQUALS; }
 ">="        { return GREATER_THAN_EQUALS; }
 "<-"        { return ASSIGNMENT; }
-"\n"        { lines ++; }
+"\n"        { yylineno ++; }
 
 
 {MINUS}?{DIGIT}+ {
-    left_value_integer();
-    return INTEGER_TYPE;
+    left_value_type(INTEGER_TYPE);
+    return INTEGER_VALUE;
 }
 {MINUS}?{DIGIT}*.{DIGIT}+ {
-    left_value_floating();
-    return FLOATING_TYPE;
+    left_value_type(FLOATING_TYPE);
+    return FLOATING_VALUE;
 }
 {ALPHA}({ALPHA}|{DIGIT})* {
     left_value_string();
@@ -58,17 +57,11 @@ MINUS   [~]
 %%
 
 /*
- * Assigns flex's left value the integer read.
+ * Assigns flex's left value the type of number read.
+ * @param   type    The type of value, Integer or Float.
  */
-void left_value_integer() {
-    yylval.integer_value = atoi(yytext);
-}
-
-/*
- * Assigns flex's left value the floating point read.
- */
-void left_value_floating() {
-    yylval.floating_value = atof(yytext);
+void left_value_type(int type) {
+    yylval.type = type;
 }
 
 /*
@@ -78,5 +71,5 @@ void left_value_string() {
     char * text = (char *)calloc(strlen(yytext+1), sizeof(char));
     strcpy(text, yytext);
 
-    yylval.string_value = text;
+    yylval.id = text;
 }

@@ -2,14 +2,17 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-int lines;
-FILE * yyin;
-char * yytext;
+enum type { INTEGER_TYPE, FLOATING_TYPE };
+
+extern char * yytext;
+extern int yylineno;
+extern FILE * yyin;
 int yylex();
 int yyerror(char const * text);
 
-void print_success();
+void print_accepted();
 bool verify_arguments(int argc, char * argv[]);
+bool verify_file(FILE * file, char * arge);
 int main(int argc, char * argv[]);
 %}
 
@@ -41,19 +44,18 @@ int main(int argc, char * argv[]);
 %token GREATER_THAN_EQUALS
 %token ASSIGNMENT
 
-%token INTEGER_TYPE
-%token FLOATING_TYPE
+%token INTEGER_VALUE
+%token FLOATING_VALUE
 %token IDENTIFIER
 
 %union {
-    int integer_value;
-    float floating_value;
-    char * string_value;
+    int type;
+    char * id;
 }
 %start prog
 
 %%
-prog        : opt_decls BEGINS opt_stmts ENDS   { print_success(); }
+prog        : opt_decls BEGINS opt_stmts ENDS   { print_accepted(); }
 ;
 
 opt_decls   : decls
@@ -99,8 +101,8 @@ term        : term ASTERISK factor
 
 factor      : LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
             | IDENTIFIER
-            | INTEGER_TYPE
-            | FLOATING_TYPE
+            | INTEGER_VALUE
+            | FLOATING_VALUE
 ;
 
 expression  : expr LESS_THAN expr
@@ -113,18 +115,19 @@ expression  : expr LESS_THAN expr
 
 /*
  * Prints Flex's Error.
+ * @param   text    Error message.
+ * @return  Error code.
  */
 int yyerror(char const * text) {
-    fprintf(stderr, "%s found while reading \'%s\' at line %d.\n",
-        text, yytext, lines);
-    fclose(yyin);
+    fprintf(stderr, "\n%s found while reading \'%s\' at line %d.\n", text, yytext, yylineno);
+    return 1;
 }
 
 /*
  * Prints a success message after the code is correctly read.
  */
-void print_success() {
-    printf("Success!\n");
+void print_accepted() {
+    printf("\nFile accepted.\n");
 }
 
 /* 
@@ -133,15 +136,27 @@ void print_success() {
  *  Too many arguments were inserted.
  * 
  * @param   argc    Argument Count.
- * @return  Whether the execution should proceed.
+ * @return  Whether execution should proceed.
  */
-bool print_argument_verification(int argc, char * argv[]) {
+bool verify_arguments(int argc, char * argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "No filename argument was provided.\n");
+        fprintf(stderr, "\nNo file argument was provided.\n");
         return false;
     } else if (argc > 2) {
-        fprintf(stdout, "Too many arguments used, using %s\n", argv[1]);
+        fprintf(stdout, "Too many arguments used, using '%s'.\n", argv[1]);
         return true;
+    } else return true;
+}
+
+/* Prints an error message if the file is null.
+ *
+ * @param   file    File pointer to verify.
+ * @return  Whether execution should proceed.
+ */
+bool verify_file(FILE * file, char * arge) {
+    if (file == NULL) {
+        fprintf(stderr, "\nFailed to open file '%s'.\n\n", arge);
+        return false;
     } else return true;
 }
 
@@ -149,10 +164,12 @@ bool print_argument_verification(int argc, char * argv[]) {
  * Executes the program.
 */
 int main(int argc, char * argv[]) {
-    if (print_argument_verification(argc, argv)){
-        yyin = fopen(argv[1], "r");
-        yyparse();
-        fclose(yyin);
-    }
+    if (!verify_arguments(argc, argv)) return 1;
+    yyin = fopen(argv[1], "r");
+    if (!verify_file(yyin, argv[1])) return 1;
+
+    yyparse();
+    fclose(yyin);
+    fprintf(stdout, "\n");
     return 0;
 }
