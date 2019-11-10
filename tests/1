@@ -1,18 +1,2 @@
-var x: int;
-var y: float
-
 begin
-    x <- 1;
-    if (x = 1)
-        x <- 2
-    ;
-    ifelse (x > 2)
-        x <- 3
-        print x
-    ;
-    while (x <= 3)
-        x = x + 1
-    ;
-    read x;
-    print x;
 end

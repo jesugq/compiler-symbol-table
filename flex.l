@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "bison.tab.h"
 
+int lines = 1;
+
 void left_value_integer();
 void left_value_floating();
 void left_value_string();
@@ -38,6 +40,7 @@ MINUS   [~]
 "<="        { return LESS_THAN_EQUALS; }
 ">="        { return GREATER_THAN_EQUALS; }
 "<-"        { return ASSIGNMENT; }
+"\n"        { lines ++; }
 
 
 {MINUS}?{DIGIT}+ {

@@ -1,10 +1,16 @@
 %{
 #include <stdio.h>
+#include <stdbool.h>
 
+int lines;
+FILE * yyin;
+char * yytext;
 int yylex();
 int yyerror(char const * text);
 
 void print_success();
+bool verify_arguments(int argc, char * argv[]);
+int main(int argc, char * argv[]);
 %}
 
 %token BEGINS
@@ -44,7 +50,6 @@ void print_success();
     float floating_value;
     char * string_value;
 }
-
 %start prog
 
 %%
@@ -62,8 +67,8 @@ decls       : dec SEMICOLON decls
 dec         : VAR IDENTIFIER COLON tipo
 ;
 
-tipo        : INTEGER_TYPE
-            | FLOATING_TYPE
+tipo        : INT
+            | FLOAT
 ;
 
 stmt        : IDENTIFIER ASSIGNMENT expr
@@ -110,7 +115,9 @@ expression  : expr LESS_THAN expr
  * Prints Flex's Error.
  */
 int yyerror(char const * text) {
-    fprintf(stderr, "%s\n", text);
+    fprintf(stderr, "%s found while reading \'%s\' at line %d.\n",
+        text, yytext, lines);
+    fclose(yyin);
 }
 
 /*
@@ -120,9 +127,32 @@ void print_success() {
     printf("Success!\n");
 }
 
+/* 
+ * Prints an error message if either:
+ *  No input file was inserted.
+ *  Too many arguments were inserted.
+ * 
+ * @param   argc    Argument Count.
+ * @return  Whether the execution should proceed.
+ */
+bool print_argument_verification(int argc, char * argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "No filename argument was provided.\n");
+        return false;
+    } else if (argc > 2) {
+        fprintf(stdout, "Too many arguments used, using %s\n", argv[1]);
+        return true;
+    } else return true;
+}
+
 /*
  * Executes the program.
 */
-void main() {
-    yyparse();
+int main(int argc, char * argv[]) {
+    if (print_argument_verification(argc, argv)){
+        yyin = fopen(argv[1], "r");
+        yyparse();
+        fclose(yyin);
+    }
+    return 0;
 }
