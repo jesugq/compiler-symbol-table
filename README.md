@@ -77,3 +77,22 @@ lex flex.l && bison -d bison.y
 gcc lex.yy.c bison.tab.c -lfl -o run.out
 ./run.out
 ```
+
+### Notes
+Tipo de Nodo: {
+    Variable
+    Constante
+    Instrucción
+    Operador
+}
+
+Apuntadores a Nodo
+
+Apuntador a Tabla de Símbolos
+    En caso de ser una variable.
+
+Valor si es una constante.
+
+Un código si es instrucción.
+
+Un código si es operador.

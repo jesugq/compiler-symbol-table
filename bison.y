@@ -4,8 +4,11 @@
 #include <stdbool.h>
 #include "hash_table.c"
 
+// Definitions
+#define INTEGER_TYPE  0
+#define FLOATING_TYPE 1
+
 // Flex Connections
-extern enum type;
 extern char * yytext;
 extern int yylineno;
 extern FILE * yyin;
@@ -13,7 +16,7 @@ int yylex();
 int yyerror(char const * text);
 
 // Hash Table Connections
-extern struct hash_table;
+extern struct hash_table symbols;
 
 // Declarations
 void print_accepted();
@@ -182,6 +185,7 @@ int main(int argc, char * argv[]) {
     if (!verify_file(yyin, argv[1])) return 1;
 
     // Execution of the program.
+    hash_table_initialize();
     yyparse();
 
     // Exiting the program.

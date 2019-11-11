@@ -1,17 +1,19 @@
 // Imports
 #include <stdio.h>
+#include <stdlib.h>
 
 // Definitions
 #define TABLE_SIZE  100
 #define TABLE_PRIME 97
-
-// Bison Connections
-extern enum type;
+#define INTEGER_TYPE  0
+#define FLOATING_TYPE 1
 
 // Declarations
-typedef struct hash_item;
-struct hash_table;
-void init_hash_table();
+typedef struct hash_item hash_item;
+typedef struct hash_table hash_table;
+struct hash_table symbols;
+struct hash_item ** hash_table_items_initialize();
+void hash_table_initialize();
 
 /**
  * @typedef     hash_item_t
@@ -20,11 +22,11 @@ void init_hash_table();
  * @field       type    Type of the identifier used in type checking.
  * @field       name    Name of the identifier used in recognition.
  */
-typedef struct hash_item_s {
+typedef struct hash_item {
     int key;
     int type;
     char * name;
-} hash_item_t;
+} hash_item;
 
 /**
  * @struct      hash_table_t
@@ -32,21 +34,33 @@ typedef struct hash_item_s {
  * @field       size    Current occupancy of the hash table.
  * @field       items   Hash Table Items stored in the hash table.
  */
-typedef struct hash_table_s {
+typedef struct hash_table {
     int size;
-    hash_item_t ** items;
-} hash_table_t;
+    hash_item ** items;
+} hash_table;
 
 /**
  * @var         hash_table
  * @abstract    Hash Table Declaration. Used in this class.
  */
-hash_table_t hash_table;
+struct hash_table symbols;
+
+/**
+ * @function    hash_table_items_initialize
+ * @abstract    Initializes the hash_table's items field.
+ * @return      Pointer to the array of hash_items.
+ */
+struct hash_item ** hash_table_items_initialize() {
+    return (struct hash_item **)calloc(
+        TABLE_SIZE, sizeof(struct hash_item *)
+    );
+} 
 
 /**
  * @function    hash_table_initialize
- * @abstract    Initializes the struct's fields.
+ * @abstract    Initializes the hash_table's fields.
  */
 void hash_table_initialize() {
-    struct hash_table_s hash_table = ;
+    symbols.size = 0;
+    symbols.items = hash_table_items_initialize();
 }

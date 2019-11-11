@@ -2,6 +2,8 @@
 // Imports
 #include <stdlib.h>
 #include "bison.tab.h"
+#define INTEGER_TYPE  0
+#define FLOATING_TYPE 1
 
 // Declarations
 void left_value_type(int type);
@@ -55,15 +57,6 @@ MINUS   [~]
     return IDENTIFIER;
 }
 %%
-
-/**
- * @enum        type
- * @abstract    Integer values to define either an integer or a floating type.
- * @constant    INTEGER_TYPE    The identifier is of integer type.
- * @constant    FLOATING_TYPE   The identifier is of float type.
- */
-enum type { INTEGER_TYPE, FLOATING_TYPE };
-
 /**
  * @function    left_value_type
  * @abstract    Assigns flex's left value the type of number read.
@@ -78,8 +71,8 @@ void left_value_type(int type) {
  * @abstract    Assigns flex's left value the text read.
  */
 void left_value_string() {
-    char * text = (char *)calloc(yylen, sizeof(char));
+    char * text = (char *)calloc(yyleng, sizeof(char));
     strcpy(text, yytext);
 
-    yylval.id = text;
+    yylval.name = text;
 }
