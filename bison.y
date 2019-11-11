@@ -12,8 +12,8 @@
 extern char * yytext;
 extern int yylineno;
 extern FILE * yyin;
-int yylex();
-int yyerror(char const * text);
+extern int yylex();
+extern int yyerror(char const * text);
 
 // Hash Table Connections
 extern struct hash_table symbols;
