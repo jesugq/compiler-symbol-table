@@ -48,5 +48,5 @@ hash_table_t hash_table;
  * @abstract    Initializes the struct's fields.
  */
 void hash_table_initialize() {
-    struct hash_table_s hash_table = 0;
+    struct hash_table_s hash_table = ;
 }
