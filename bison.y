@@ -1,15 +1,21 @@
 %{
+// Imports
 #include <stdio.h>
 #include <stdbool.h>
+#include "hash_table.c"
 
-enum type { INTEGER_TYPE, FLOATING_TYPE };
-
+// Flex Connections
+extern enum type;
 extern char * yytext;
 extern int yylineno;
 extern FILE * yyin;
 int yylex();
 int yyerror(char const * text);
 
+// Hash Table Connections
+extern struct hash_table;
+
+// Declarations
 void print_accepted();
 bool verify_arguments(int argc, char * argv[]);
 bool verify_file(FILE * file, char * arge);
@@ -50,12 +56,13 @@ int main(int argc, char * argv[]);
 
 %union {
     int type;
-    char * id;
+    char * name;
 }
 %start prog
 
 %%
-prog        : opt_decls BEGINS opt_stmts ENDS   { print_accepted(); }
+prog        : opt_decls BEGINS opt_stmts ENDS
+                { print_accepted(); }
 ;
 
 opt_decls   : decls
@@ -113,30 +120,30 @@ expression  : expr LESS_THAN expr
 ;
 %%
 
-/*
- * Prints Flex's Error.
- * @param   text    Error message.
- * @return  Error code.
+/**
+ * @function    yyerror
+ * @abstract    Prints Flex's Error.
+ * @param       text    Error message.
+ * @return      Error code.
  */
 int yyerror(char const * text) {
     fprintf(stderr, "\n%s found while reading \'%s\' at line %d.\n", text, yytext, yylineno);
     return 1;
 }
 
-/*
- * Prints a success message after the code is correctly read.
+/**
+ * @function    print_accepted
+ * @abstract    Prints a success message after the code is correctly read.
  */
 void print_accepted() {
     printf("\nFile accepted.\n");
 }
 
-/* 
- * Prints an error message if either:
- *  No input file was inserted.
- *  Too many arguments were inserted.
- * 
- * @param   argc    Argument Count.
- * @return  Whether execution should proceed.
+/**
+ * @function    verify_arguments
+ * @abstract    Checks the argument count and returns if it were satisfactory.
+ * @param       argc    Argument Count.
+ * @return      True if enough arguments were inserted.
  */
 bool verify_arguments(int argc, char * argv[]) {
     if (argc < 2) {
@@ -148,10 +155,11 @@ bool verify_arguments(int argc, char * argv[]) {
     } else return true;
 }
 
-/* Prints an error message if the file is null.
- *
- * @param   file    File pointer to verify.
- * @return  Whether execution should proceed.
+/** 
+ * @function    verify_file
+ * @abstract    Tries to open a file and returns if it was correctly opened.
+ * @param       file    File pointer to verify.
+ * @return      True if the file was opened correctly.
  */
 bool verify_file(FILE * file, char * arge) {
     if (file == NULL) {
@@ -160,15 +168,23 @@ bool verify_file(FILE * file, char * arge) {
     } else return true;
 }
 
-/*
- * Executes the program.
-*/
+/**
+ * @function    main
+ * @abstract    Executes the program.
+ * @param       argc    Argument count.
+ * @param       argv    Argument values.
+ * @return      Zero if the system finished successfully.
+ */
 int main(int argc, char * argv[]) {
+    // Argument and file verification
     if (!verify_arguments(argc, argv)) return 1;
     yyin = fopen(argv[1], "r");
     if (!verify_file(yyin, argv[1])) return 1;
 
+    // Execution of the program.
     yyparse();
+
+    // Exiting the program.
     fclose(yyin);
     fprintf(stdout, "\n");
     return 0;
