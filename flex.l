@@ -1,5 +1,6 @@
 %{
 // Imports
+#include <stdio.h>
 #include <stdlib.h>
 #include "bison.tab.h"
 #define INTEGER_TYPE  0
@@ -8,6 +9,7 @@
 // Declarations
 void left_value_type(int type);
 void left_value_string();
+void log_name_initialization(char * text);
 %}
 
 ALPHA   [a-zA-Z]
@@ -41,8 +43,7 @@ MINUS   [~]
 "<="        { return LESS_THAN_EQUALS; }
 ">="        { return GREATER_THAN_EQUALS; }
 "<-"        { return ASSIGNMENT; }
-"\n"        { yylineno ++; }
-
+\n          { yylineno ++; }
 
 {MINUS}?{DIGIT}+ {
     left_value_type(INTEGER_TYPE);
@@ -73,6 +74,16 @@ void left_value_type(int type) {
 void left_value_string() {
     char * text = (char *)calloc(yyleng, sizeof(char));
     strcpy(text, yytext);
+    log_name_initialization(text);
 
     yylval.name = text;
+}
+
+/**
+ * @function    log_name_initialization
+ * @abstract    Logs the creation of the text value.
+ */
+void log_name_initialization(char * text) {
+    fprintf(stdout, "A variable has been created: '%s' at position %p\n",
+        text, &text);
 }

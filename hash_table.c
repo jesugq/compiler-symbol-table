@@ -13,6 +13,7 @@ typedef struct hash_item hash_item;
 typedef struct hash_table hash_table;
 struct hash_table symbols;
 struct hash_item ** hash_table_items_initialize();
+void log_hash_items_initialization(struct hash_item **);
 void hash_table_initialize();
 
 /**
@@ -51,10 +52,20 @@ struct hash_table symbols;
  * @return      Pointer to the array of hash_items.
  */
 struct hash_item ** hash_table_items_initialize() {
-    return (struct hash_item **)calloc(
-        TABLE_SIZE, sizeof(struct hash_item *)
-    );
-} 
+    struct hash_item ** items = (struct hash_item **)calloc(
+        TABLE_SIZE, sizeof(struct hash_item *));
+    log_hash_items_initialization(items);
+    return items;
+}
+
+/**
+ * @function    log_hash_items_initialization
+ * @abstract    Logs the creation of the hash_table's items array.
+ */
+void log_hash_items_initialization(struct hash_item ** items) {
+    fprintf(stdout, "A table has been created: %d elements at position %p\n",
+        TABLE_SIZE, items);
+}
 
 /**
  * @function    hash_table_initialize
