@@ -74,7 +74,7 @@ expression  : expr LESS_THAN expr
 ### Compilation
 ```bash
 lex flex.l && bison -d bison.y
-gcc lex.yy.c bison.tab.c -lfl -o run.out
+gcc lex.yy.c bison.tab.c -lfl -lm -o run.out
 ./run.out
 ```
 

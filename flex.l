@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "bison.tab.h"
-#define INTEGER_TYPE  0
+#define INTEGER_TYPE 0
 #define FLOATING_TYPE 1
 
 // Declarations

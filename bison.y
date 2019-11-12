@@ -5,7 +5,7 @@
 #include "hash_table.c"
 
 // Definitions
-#define INTEGER_TYPE  0
+#define INTEGER_TYPE 0
 #define FLOATING_TYPE 1
 
 // Flex Connections
@@ -16,7 +16,7 @@ extern int yylex();
 extern int yyerror(char const * text);
 
 // Hash Table Connections
-extern struct hash_table symbols;
+extern struct hash_table table;
 
 // Declarations
 void print_accepted();
@@ -64,8 +64,9 @@ int main(int argc, char * argv[]);
 %start prog
 
 %%
-prog        : opt_decls BEGINS opt_stmts ENDS
-                { print_accepted(); }
+prog        : opt_decls BEGINS opt_stmts ENDS {
+                print_accepted();
+            }
 ;
 
 opt_decls   : decls
@@ -186,6 +187,7 @@ int main(int argc, char * argv[]) {
 
     // Execution of the program.
     hash_table_initialize();
+    hash_table_print();
     yyparse();
 
     // Exiting the program.
