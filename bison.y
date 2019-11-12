@@ -4,10 +4,6 @@
 #include <stdbool.h>
 #include "hash_table.c"
 
-// Definitions
-#define INTEGER_TYPE 0
-#define FLOATING_TYPE 1
-
 // Flex Connections
 extern char * yytext;
 extern int yylineno;
@@ -23,44 +19,51 @@ void print_accepted();
 bool verify_arguments(int argc, char * argv[]);
 bool verify_file(FILE * file, char * arge);
 int main(int argc, char * argv[]);
+
+void what_am_i(char * code);
 %}
 
-%token BEGINS
-%token ENDS
-%token IF
-%token ELSE
-%token IFELSE
-%token WHILE
-%token READ
-%token PRINT
-
-%token INT
-%token FLOAT
-%token VAR
-
-%token COLON
-%token SEMICOLON
-%token LEFT_PARENTHESIS
-%token RIGHT_PARENTHESIS
-%token PLUS
-%token MINUS
-%token ASTERISK
-%token SLASH
-%token LESS_THAN
-%token GREATER_THAN
-%token EQUALS
-%token LESS_THAN_EQUALS
-%token GREATER_THAN_EQUALS
-%token ASSIGNMENT
-
-%token INTEGER_VALUE
-%token FLOATING_VALUE
-%token IDENTIFIER
-
 %union {
+    int reserved;
     int type;
-    char * name;
+    int operator;
+    int integer;
+    float floating;
+    char * identifier;
 }
+
+%token<reserved> BEGINS
+%token<reserved> ENDS
+%token<reserved> IF
+%token<reserved> ELSE
+%token<reserved> IFELSE
+%token<reserved> WHILE
+%token<reserved> READ
+%token<reserved> PRINT
+
+%token<type> INT
+%token<type> FLOAT
+%token<type> VAR
+
+%token<operator> COLON
+%token<operator> SEMICOLON
+%token<operator> LEFT_PARENTHESIS
+%token<operator> RIGHT_PARENTHESIS
+%token<operator> PLUS
+%token<operator> MINUS
+%token<operator> ASTERISK
+%token<operator> SLASH
+%token<operator> LESS_THAN
+%token<operator> GREATER_THAN
+%token<operator> EQUALS
+%token<operator> LESS_THAN_EQUALS
+%token<operator> GREATER_THAN_EQUALS
+%token<operator> ASSIGNMENT
+
+%token<integer> INTEGER_VALUE
+%token<floating> FLOATING_VALUE
+%token<identifier> IDENTIFIER
+
 %start prog
 
 %%
@@ -77,7 +80,9 @@ decls       : dec SEMICOLON decls
             | dec
 ;
 
-dec         : VAR IDENTIFIER COLON tipo
+dec         : VAR IDENTIFIER COLON tipo {
+                what_am_i($2);
+            }
 ;
 
 tipo        : INT
@@ -124,6 +129,10 @@ expression  : expr LESS_THAN expr
 ;
 %%
 
+void what_am_i(char * code) {
+    printf("Code: %s\n", code);
+}
+
 /**
  * @function    yyerror
  * @abstract    Prints Flex's Error.
@@ -131,7 +140,7 @@ expression  : expr LESS_THAN expr
  * @return      Error code.
  */
 int yyerror(char const * text) {
-    fprintf(stderr, "\n%s found while reading \'%s\' at line %d.\n", text, yytext, yylineno);
+    fprintf(stderr, "\n%s found while reading '%s' at line %d.\n", text, yytext, yylineno);
     return 1;
 }
 
@@ -187,7 +196,6 @@ int main(int argc, char * argv[]) {
 
     // Execution of the program.
     hash_table_initialize();
-    hash_table_print();
     yyparse();
 
     // Exiting the program.

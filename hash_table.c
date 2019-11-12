@@ -7,8 +7,6 @@
 
 // Definitions
 #define TABLE_SIZE 30
-#define INTEGER_TYPE 0
-#define FLOATING_TYPE 1
 
 // Declarations
 typedef struct hash_item hash_item;

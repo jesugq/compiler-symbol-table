@@ -12,10 +12,10 @@ Input to the parser is a text file, whose name has to be given to the parser as 
 // Tokens for reserved words.
 %token BEGINS ENDS IF ELSE IFELSE WHILE READ PRINT
 
-// Tokens for value assignment.
+// Tokens for type assignment.
 %token INT FLOAT VAR
 
-// Tokens for reserved symbols.
+// Tokens for reserved operators.
 %token COLON SEMICOLON LEFT_PARENTHESIS RIGHT_PARENTHESIS PLUS MINUS ASTERISK SLASH LESS_THAN GREATER_THAN EQUALS LESS_THAN_EQUALS GREATER_THAN_EQUALS ASSIGNMENT
 
 // Enums for the type of an identifier.
@@ -73,9 +73,14 @@ expression  : expr LESS_THAN expr
 
 ### Compilation
 ```bash
-lex flex.l && bison -d bison.y
+lex flex.l
+bison -d bison.y
 gcc lex.yy.c bison.tab.c -lfl -lm -o run.out
-./run.out
+./run.out file1.txt
+
+# Or the short version
+lex flex.l && bison -d bison.y && gcc lex.yy.c bison.tab.c -lfl -lm -o run.out
+./run.out file1.txt
 ```
 
 ### Notes

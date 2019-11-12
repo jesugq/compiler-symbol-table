@@ -3,12 +3,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "bison.tab.h"
-#define INTEGER_TYPE 0
-#define FLOATING_TYPE 1
 
 // Declarations
-void left_value_type(int type);
-void left_value_string();
+void left_value_reserved();
+void left_value_type();
+void left_value_operator();
+void left_value_integer();
+void left_value_floating();
+void left_value_identifier();
 void log_name_initialization(char * text);
 %}
 
@@ -17,66 +19,118 @@ DIGIT   [0-9]
 MINUS   [~]
 
 %%
-"begin"     { return BEGINS; }
-"end"       { return ENDS; }
-"if"        { return IF; }
-"ifelse"    { return IFELSE; }
-"while"     { return WHILE; }
-"read"      { return READ; }
-"print"     { return PRINT; }
+"begin"     { left_value_reserved(BEGINS);      return BEGINS; }
+"end"       { left_value_reserved(ENDS);        return ENDS; }
+"if"        { left_value_reserved(IF);          return IF; }
+"ifelse"    { left_value_reserved(IFELSE);      return IFELSE; }
+"while"     { left_value_reserved(WHILE);       return WHILE; }
+"read"      { left_value_reserved(READ);        return READ; }
+"print"     { left_value_reserved(PRINT);       return PRINT; }
 
-"int"       { return INT; }
-"float"     { return FLOAT; }
-"var"       { return VAR; }
+"int"       { left_value_type(INT);     return INT; }
+"float"     { left_value_type(FLOAT);   return FLOAT; }
+"var"       { left_value_type(VAR);     return VAR; }
 
-":"         { return COLON; }
-";"         { return SEMICOLON; }
-"("         { return LEFT_PARENTHESIS; }
-")"         { return RIGHT_PARENTHESIS; }
-"+"         { return PLUS; };
-"-"         { return MINUS; };
-"*"         { return ASTERISK; };
-"/"         { return SLASH; }
-"<"         { return LESS_THAN; }
-">"         { return GREATER_THAN; }
-"="         { return EQUALS; }
-"<="        { return LESS_THAN_EQUALS; }
-">="        { return GREATER_THAN_EQUALS; }
-"<-"        { return ASSIGNMENT; }
-\n          { yylineno ++; }
+":"         { left_value_operator(COLON);
+              return COLON; }
+";"         { left_value_operator(SEMICOLON);
+              return SEMICOLON; }
+"("         { left_value_operator(LEFT_PARENTHESIS);
+              return LEFT_PARENTHESIS; }
+")"         { left_value_operator(RIGHT_PARENTHESIS);
+              return RIGHT_PARENTHESIS; }
+"+"         { left_value_operator(PLUS);
+              return PLUS; }
+"-"         { left_value_operator(MINUS);
+              return MINUS; }
+"*"         { left_value_operator(ASTERISK);
+              return ASTERISK; }
+"/"         { left_value_operator(SLASH);
+              return SLASH; }
+"<"         { left_value_operator(LESS_THAN);
+              return LESS_THAN; }
+">"         { left_value_operator(GREATER_THAN);
+              return GREATER_THAN; }
+"="         { left_value_operator(EQUALS);
+              return EQUALS; }
+"<="        { left_value_operator(LESS_THAN_EQUALS);
+              return LESS_THAN_EQUALS; }
+">="        { left_value_operator(GREATER_THAN_EQUALS);
+              return GREATER_THAN_EQUALS; }
+"<-"        { left_value_operator(ASSIGNMENT);
+              return ASSIGNMENT; }
+
+"\n"        { yylineno ++; }
 
 {MINUS}?{DIGIT}+ {
-    left_value_type(INTEGER_TYPE);
+    left_value_integer();
     return INTEGER_VALUE;
 }
 {MINUS}?{DIGIT}*.{DIGIT}+ {
-    left_value_type(FLOATING_TYPE);
+    left_value_floating();
     return FLOATING_VALUE;
 }
 {ALPHA}({ALPHA}|{DIGIT})* {
-    left_value_string();
+    left_value_identifier();
     return IDENTIFIER;
 }
 %%
 /**
+ * @function    left_value_reserved
+ * @abstract    Assigns flex's left value the reserved word read.
+ * @param       reserved    Reserved word code.
+ */
+void left_value_reserved(int reserved) {
+    yylval.reserved = reserved;
+}
+
+/**
  * @function    left_value_type
- * @abstract    Assigns flex's left value the type of number read.
- * @param       type    The type of value, Integer or Float.
+ * @abstract    Assign's flex's left value the value type read.
+ * @param       type    Value type code.
  */
 void left_value_type(int type) {
     yylval.type = type;
 }
 
 /**
- * @function    left_value_string
- * @abstract    Assigns flex's left value the text read.
+ * @function    left_value_operator
+ * @abstract    Assigns flex's left value the operator read.
+ * @param       operator    Operator code.
  */
-void left_value_string() {
-    char * text = (char *)calloc(yyleng, sizeof(char));
-    strcpy(text, yytext);
-    log_name_initialization(text);
+void left_value_operator(int operator) {
+    yylval.operator = operator;
+}
 
-    yylval.name = text;
+/**
+ * @function    left_value_integer
+ * @abstract    Assigns flex's left value the integer read.
+ * @param       integer     Integer value.
+ */
+void left_value_integer() {
+    int integer = atoi(yytext);
+    yylval.integer = integer;
+}
+
+/**
+ * @function    left_value_floating
+ * @abstract    Assigns flex's left value the floating point read.
+ * @param       floating    Floating point value.
+ */
+void left_value_floating() {
+    float floating = atof(yytext);
+    yylval.floating = floating;
+}
+
+/**
+ * @function    left_value_identifier
+ * @abstract    Allocates and assigns flex's left value the identifier read.
+ */
+void left_value_identifier() {
+    char * identifier = (char *)calloc(yyleng, sizeof(char));
+    strcpy(identifier, yytext);
+    log_name_initialization(identifier);
+    yylval.identifier = identifier;
 }
 
 /**
