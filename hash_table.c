@@ -18,7 +18,7 @@ int hash_index(int code);
 void hash_table_initialize();
 bool hash_table_is_full();
 void hash_table_print();
-void hash_table_insert(char * identifier);
+void hash_table_insert(char * identifier, int type);
 void hash_table_terminate();
 
 /**
@@ -30,17 +30,22 @@ void hash_table_terminate();
  */
 typedef struct hash_item {
     int code;
+    int type;
     char * identifier;
 } hash_item;
 
 /**
- * @struct      hash_table_t
+ * @struct      haclsh_table_t
  * @abstract    Hash Table Definition.
  * @field       size    Current occupancy of the hash table.
+ * @field       int_t   Integer type number code.
+ * @field       flt_t   Floating type number code.
  * @field       items   Hash Table Items stored in the hash table.
  */
 typedef struct hash_table {
     int size;
+    int integer_value;
+    int floating_value;
     struct hash_item * items;
 } hash_table;
 
@@ -95,8 +100,12 @@ int hash_index(int code) {
 /**
  * @function    hash_table_initialize
  * @abstract    Initializes the hash_table's fields.
+ * @param       integer_value   Integer type code.
+ * @param       floating_value  Float type code.
  */
-void hash_table_initialize() {
+void hash_table_initialize(int integer_value, int floating_value) {
+    table.integer_value = integer_value;
+    table.floating_value = floating_value;
     table.size = 0;
     table.items = hash_table_items_initialize();
 }
@@ -116,10 +125,15 @@ bool hash_table_is_full() {
  */
 void hash_table_print() {
     int i;
+    char integer[] = "int";
+    char floating[] = "float";
     fprintf(stdout, "\n");
     for (i=0; i<TABLE_SIZE; i++) {
-        fprintf(stdout, "table[%2d] = {%d, %s}\n",
-            i, table.items[i].code, table.items[i].identifier);
+        fprintf(stdout, "table[%2d] = {%d, %s, %s}\n",
+            i, table.items[i].code,
+            table.items[i].type == table.integer_value ? integer:floating,
+            table.items[i].identifier
+        );
     }
 }
 
@@ -129,7 +143,7 @@ void hash_table_print() {
  * @discussion  Insertion implements a linear probing system.
  * @param       identifier  Name of the identifier.
  */
-void hash_table_insert(char * identifier) {
+void hash_table_insert(char * identifier, int type) {
     if (hash_table_is_full()) return;
 
     int code = hash_code(identifier);
@@ -139,7 +153,7 @@ void hash_table_insert(char * identifier) {
         index ++;
         if (index >= TABLE_SIZE) index = 0;
     }
-    struct hash_item item = {code, identifier};
+    struct hash_item item = {code, type, identifier};
     
     table.size ++;
     table.items[index] = item;

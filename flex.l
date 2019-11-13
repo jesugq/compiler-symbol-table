@@ -6,7 +6,6 @@
 #include "bison.tab.h"
 
 // Declarations
-int global = 0;
 void left_value_reserved();
 void left_value_type();
 void left_value_operator();
@@ -20,48 +19,58 @@ ALPHA   [a-zA-Z]
 DIGIT   [0-9]
 
 %%
-"begin"     { left_value_reserved(BEGINS);      return BEGINS; }
-"end"       { left_value_reserved(ENDS);        return ENDS; }
-"if"        { left_value_reserved(IF);          return IF; }
-"ifelse"    { left_value_reserved(IFELSE);      return IFELSE; }
-"while"     { left_value_reserved(WHILE);       return WHILE; }
-"read"      { left_value_reserved(READ);        return READ; }
-"print"     { left_value_reserved(PRINT);       return PRINT; }
+"begin"     { left_value_reserved(BEGINS);
+                return BEGINS; }
+"end"       { left_value_reserved(ENDS); 
+                return ENDS; }
+"if"        { left_value_reserved(IF);
+                return IF; }
+"ifelse"    { left_value_reserved(IFELSE);
+                return IFELSE; }
+"while"     { left_value_reserved(WHILE);
+                return WHILE; }
+"read"      { left_value_reserved(READ);
+                return READ; }
+"print"     { left_value_reserved(PRINT);
+                return PRINT; }
 
-"int"       { left_value_type(INT);     return INT; }
-"float"     { left_value_type(FLOAT);   return FLOAT; }
-"var"       { left_value_type(VAR);     return VAR; }
+"int"       { left_value_type(INT);
+                return INT; }
+"float"     { left_value_type(FLOAT);
+                return FLOAT; }
+"var"       { left_value_type(VAR);
+                return VAR; }
 
 ":"         { left_value_operator(COLON);
-              return COLON; }
+                return COLON; }
 ";"         { left_value_operator(SEMICOLON);
-              return SEMICOLON; }
+                return SEMICOLON; }
 "("         { left_value_operator(LEFT_PARENTHESIS);
-              return LEFT_PARENTHESIS; }
+                return LEFT_PARENTHESIS; }
 ")"         { left_value_operator(RIGHT_PARENTHESIS);
-              return RIGHT_PARENTHESIS; }
+                return RIGHT_PARENTHESIS; }
 "+"         { left_value_operator(PLUS);
-              return PLUS; }
+                return PLUS; }
 "-"         { left_value_operator(MINUS);
-              return MINUS; }
+                return MINUS; }
 "*"         { left_value_operator(ASTERISK);
-              return ASTERISK; }
+                return ASTERISK; }
 "/"         { left_value_operator(SLASH);
-              return SLASH; }
+                return SLASH; }
 "<"         { left_value_operator(LESS_THAN);
-              return LESS_THAN; }
+                return LESS_THAN; }
 ">"         { left_value_operator(GREATER_THAN);
-              return GREATER_THAN; }
+                return GREATER_THAN; }
 "="         { left_value_operator(EQUALS);
-              return EQUALS; }
+                return EQUALS; }
 "<="        { left_value_operator(LESS_THAN_EQUALS);
-              return LESS_THAN_EQUALS; }
+                return LESS_THAN_EQUALS; }
 ">="        { left_value_operator(GREATER_THAN_EQUALS);
-              return GREATER_THAN_EQUALS; }
+                return GREATER_THAN_EQUALS; }
 "<-"        { left_value_operator(ASSIGNMENT);
-              return ASSIGNMENT; }
+                return ASSIGNMENT; }
 "~"         { left_value_operator(NEGATIVE);
-              return NEGATIVE; }
+                return NEGATIVE; }
 
 "\n"        { yylineno ++; }
 

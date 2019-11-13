@@ -19,7 +19,7 @@ void print_accepted();
 bool verify_arguments(int argc, char * argv[]);
 bool verify_file(FILE * file, char * arge);
 bool assert_identifier_exists(char * identifier);
-void execute_identifier_insert(char * identifier);
+void execute_identifier_insert(char * identifier, int type);
 void error_identifier_repeated(char * identifier);
 void error_identifier_missing(char * identifier);
 int main(int argc, char * argv[]);
@@ -68,6 +68,8 @@ int main(int argc, char * argv[]);
 %token<floating> FLOATING_VALUE
 %token<identifier> IDENTIFIER
 
+%type<type> tipo
+
 %start prog
 
 %%
@@ -84,7 +86,7 @@ decls       : dec SEMICOLON decls
 
 dec         : VAR IDENTIFIER COLON tipo {
                 if (!assert_identifier_exists($2))
-                    execute_identifier_insert($2);
+                    execute_identifier_insert($2, $4);
                 else {
                     error_identifier_repeated($2);
                     YYERROR;
@@ -98,7 +100,8 @@ tipo        : INT
 
 stmt        : IDENTIFIER ASSIGNMENT expr {
                 if (assert_identifier_exists($1))
-                    free($1);
+                    // free($1)
+                    ;
                     // Should be freed but can be used later
                 else {
                     error_identifier_missing($1);
@@ -110,7 +113,8 @@ stmt        : IDENTIFIER ASSIGNMENT expr {
             | WHILE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt
             | READ IDENTIFIER {
                 if (assert_identifier_exists($2))
-                    free($2);
+                    // free($2)+
+                    ;
                     // Should be freed but can be used later
                 else {
                     error_identifier_missing($2);
@@ -145,7 +149,8 @@ term        : term ASTERISK factor
 factor      : LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
             | IDENTIFIER {
                 if (assert_identifier_exists($1))
-                    free($1);
+                    // free($1)
+                    ;
                     // Should be freed but can be used later
                 else {
                     error_identifier_missing($1);
@@ -221,8 +226,10 @@ bool assert_identifier_exists(char * identifier) {
  * @abstract    Inserts an identifier in the hash table.
  * @param       identifier  Name of the identifier.
  */
-void execute_identifier_insert(char * identifier) {
-    hash_table_insert(identifier);
+void execute_identifier_insert(char * identifier, int type) {
+    if (type == INT) type = INTEGER_VALUE;
+    else type = FLOATING_VALUE;
+    hash_table_insert(identifier, type);
 }
 
 /**
@@ -257,7 +264,7 @@ int main(int argc, char * argv[]) {
     if (!verify_file(yyin, argv[1])) return 1;
 
     // Execution of the program.
-    hash_table_initialize();
+    hash_table_initialize(INTEGER_VALUE, FLOATING_VALUE);
     if (yyparse() == 0)
         printf("\nFile Accepted.\n");
     hash_table_print();
