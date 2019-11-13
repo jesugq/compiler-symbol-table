@@ -18,9 +18,12 @@ extern struct hash_table table;
 void print_accepted();
 bool verify_arguments(int argc, char * argv[]);
 bool verify_file(FILE * file, char * arge);
+bool assert_identifier_exists(char * identifier);
+void execute_identifier_insert(char * identifier);
+void error_identifier_repeated(char * identifier);
+void error_identifier_missing(char * identifier);
 int main(int argc, char * argv[]);
 
-void what_am_i(char * code);
 %}
 
 %union {
@@ -59,6 +62,7 @@ void what_am_i(char * code);
 %token<operator> LESS_THAN_EQUALS
 %token<operator> GREATER_THAN_EQUALS
 %token<operator> ASSIGNMENT
+%token<operator> NEGATIVE
 
 %token<integer> INTEGER_VALUE
 %token<floating> FLOATING_VALUE
@@ -67,9 +71,7 @@ void what_am_i(char * code);
 %start prog
 
 %%
-prog        : opt_decls BEGINS opt_stmts ENDS {
-                print_accepted();
-            }
+prog        : opt_decls BEGINS opt_stmts ENDS
 ;
 
 opt_decls   : decls
@@ -81,7 +83,12 @@ decls       : dec SEMICOLON decls
 ;
 
 dec         : VAR IDENTIFIER COLON tipo {
-                what_am_i($2);
+                if (!assert_identifier_exists($2))
+                    execute_identifier_insert($2);
+                else {
+                    error_identifier_repeated($2);
+                    YYERROR;
+                }
             }
 ;
 
@@ -89,11 +96,27 @@ tipo        : INT
             | FLOAT
 ;
 
-stmt        : IDENTIFIER ASSIGNMENT expr
+stmt        : IDENTIFIER ASSIGNMENT expr {
+                if (assert_identifier_exists($1))
+                    free($1);
+                    // Should be freed but can be used later
+                else {
+                    error_identifier_missing($1);
+                    YYERROR;
+                }
+            }
             | IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt
             | IFELSE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt stmt
             | WHILE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt
-            | READ IDENTIFIER
+            | READ IDENTIFIER {
+                if (assert_identifier_exists($2))
+                    free($2);
+                    // Should be freed but can be used later
+                else {
+                    error_identifier_missing($2);
+                    YYERROR;
+                }
+            }
             | PRINT expr
             | BEGINS opt_stmts ENDS
 ;
@@ -105,8 +128,12 @@ stmt_lst    : stmt SEMICOLON stmt_lst
             | stmt
 ;
 
+expression  : expr
+            | expr relop expr
+
 expr        : expr PLUS term
             | expr MINUS term
+            | signo term
             | term
 ;
 
@@ -116,22 +143,28 @@ term        : term ASTERISK factor
 ;
 
 factor      : LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
-            | IDENTIFIER
+            | IDENTIFIER {
+                if (assert_identifier_exists($1))
+                    free($1);
+                    // Should be freed but can be used later
+                else {
+                    error_identifier_missing($1);
+                    YYERROR;
+                }
+            }
             | INTEGER_VALUE
             | FLOATING_VALUE
 ;
 
-expression  : expr LESS_THAN expr
-            | expr GREATER_THAN expr
-            | expr EQUALS expr
-            | expr LESS_THAN_EQUALS expr
-            | expr GREATER_THAN_EQUALS expr
+relop       : LESS_THAN
+            | GREATER_THAN
+            | EQUALS
+            | LESS_THAN_EQUALS
+            | GREATER_THAN_EQUALS
+
+signo       : NEGATIVE
 ;
 %%
-
-void what_am_i(char * code) {
-    printf("Code: %s\n", code);
-}
 
 /**
  * @function    yyerror
@@ -140,16 +173,8 @@ void what_am_i(char * code) {
  * @return      Error code.
  */
 int yyerror(char const * text) {
-    fprintf(stderr, "\n%s found while reading '%s' at line %d.\n", text, yytext, yylineno);
+    fprintf(stderr, "\n%s found after reading '%s' at line %d.\n", text, yytext, yylineno);
     return 1;
-}
-
-/**
- * @function    print_accepted
- * @abstract    Prints a success message after the code is correctly read.
- */
-void print_accepted() {
-    printf("\nFile accepted.\n");
 }
 
 /**
@@ -182,6 +207,43 @@ bool verify_file(FILE * file, char * arge) {
 }
 
 /**
+ * @function    assert_identifier_exists
+ * @abstract    Tries to look for an identifier in the hash table.
+ * @param       identifier  Name of the identifier.
+ * @return      True if the identifier exists in the table.
+ */
+bool assert_identifier_exists(char * identifier) {
+    return hash_table_search(identifier);
+}
+
+/**
+ * @function    execute_identifier_insert
+ * @abstract    Inserts an identifier in the hash table.
+ * @param       identifier  Name of the identifier.
+ */
+void execute_identifier_insert(char * identifier) {
+    hash_table_insert(identifier);
+}
+
+/**
+ * @function    error_identifier_repeated
+ * @abstract    Calls yyerror with reason: Identifier is declared twice.
+ * @param       identifier  Name of the identifier.
+ */
+void error_identifier_repeated(char * identifier) {
+    yyerror("variable declared twice");
+}
+
+/**
+ * @function    error_identifier_missing
+ * @abstract    Calls yyerror with reason: Identifier was not declared once.
+ * @param       identifier  Name of the identifier.
+ */
+void error_identifier_missing(char * identifier) {
+    yyerror("variable unknown");
+}
+
+/**
  * @function    main
  * @abstract    Executes the program.
  * @param       argc    Argument count.
@@ -196,7 +258,10 @@ int main(int argc, char * argv[]) {
 
     // Execution of the program.
     hash_table_initialize();
-    yyparse();
+    if (yyparse() == 0)
+        printf("\nFile Accepted.\n");
+    hash_table_print();
+    hash_table_terminate();
 
     // Exiting the program.
     fclose(yyin);

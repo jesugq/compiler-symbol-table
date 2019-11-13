@@ -1,0 +1,14 @@
+var ab: int;
+var A: int;
+var bb: int;
+var B: int;
+var c: int;
+var w: int
+begin
+    print ab;
+    print A;
+    read bb;
+    read B;
+    print c;
+    read w
+end

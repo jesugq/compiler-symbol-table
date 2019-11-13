@@ -18,8 +18,8 @@ Input to the parser is a text file, whose name has to be given to the parser as 
 // Tokens for reserved operators.
 %token COLON SEMICOLON LEFT_PARENTHESIS RIGHT_PARENTHESIS PLUS MINUS ASTERISK SLASH LESS_THAN GREATER_THAN EQUALS LESS_THAN_EQUALS GREATER_THAN_EQUALS ASSIGNMENT
 
-// Enums for the type of an identifier.
-enum type { INTEGER_TYPE, FLOATING_TYPE }
+// Tokens for memory allocated values.
+%token INTEGER_VALUE FLOATING_VALUE IDENTIFIER
 ```
 
 ### Grammar

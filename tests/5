@@ -1,0 +1,7 @@
+var hello: int;
+var world: float
+begin
+    read hello;
+    print hello;
+    read oliart
+end

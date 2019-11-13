@@ -2,21 +2,22 @@
 // Imports
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "bison.tab.h"
 
 // Declarations
+int global = 0;
 void left_value_reserved();
 void left_value_type();
 void left_value_operator();
 void left_value_integer();
 void left_value_floating();
 void left_value_identifier();
-void log_name_initialization(char * text);
+
 %}
 
 ALPHA   [a-zA-Z]
 DIGIT   [0-9]
-MINUS   [~]
 
 %%
 "begin"     { left_value_reserved(BEGINS);      return BEGINS; }
@@ -59,14 +60,16 @@ MINUS   [~]
               return GREATER_THAN_EQUALS; }
 "<-"        { left_value_operator(ASSIGNMENT);
               return ASSIGNMENT; }
+"~"         { left_value_operator(NEGATIVE);
+              return NEGATIVE; }
 
 "\n"        { yylineno ++; }
 
-{MINUS}?{DIGIT}+ {
+{DIGIT}+ {
     left_value_integer();
     return INTEGER_VALUE;
 }
-{MINUS}?{DIGIT}*.{DIGIT}+ {
+{DIGIT}*.{DIGIT}+ {
     left_value_floating();
     return FLOATING_VALUE;
 }
@@ -127,17 +130,6 @@ void left_value_floating() {
  * @abstract    Allocates and assigns flex's left value the identifier read.
  */
 void left_value_identifier() {
-    char * identifier = (char *)calloc(yyleng, sizeof(char));
-    strcpy(identifier, yytext);
-    log_name_initialization(identifier);
+    char * identifier = strdup(yytext);
     yylval.identifier = identifier;
-}
-
-/**
- * @function    log_name_initialization
- * @abstract    Logs the creation of the text value.
- */
-void log_name_initialization(char * text) {
-    fprintf(stdout, "A variable has been created: '%s' at position %p\n",
-        text, &text);
 }
