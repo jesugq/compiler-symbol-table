@@ -1,8 +1,0 @@
-var hello: int;
-var world: float;
-var oliart: int
-begin
-    read hello;
-    print hello;
-    read oliart
-end
