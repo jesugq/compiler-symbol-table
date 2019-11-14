@@ -1,3 +1,4 @@
 lex.yy.c
 bison.tab.c
 bison.tab.h
+run.out
