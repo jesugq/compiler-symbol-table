@@ -16,6 +16,7 @@ extern struct hash_table table;
 
 // Declarations
 bool verify_arguments(int, char *);
+bool verify_files(FILE *, char *);
 int main(int, char *)
 %}
 
