@@ -14,14 +14,16 @@
 typedef struct hash_item hash_item;
 typedef struct hash_table hash_table;
 struct hash_table * table;
-struct hash_item * hash_table_items_initialize();
+struct hash_item * hash_items_initialize();
 int hash_key(char *);
 int hash_index(int);
 void hash_table_initialize();
 bool hash_table_full();
 void hash_table_print();
-void hash_table_insert(char *, int, double);
+bool hash_table_insert(char *, int);
+bool hash_table_assign(char *, double);
 int hash_table_search(char *);
+double hash_table_value(char *);
 bool hash_table_match(char *, int);
 void hash_table_terminate();
 
@@ -52,7 +54,7 @@ typedef struct hash_table {
  * @var         table
  * @abstract    Hash table declaration. Holds this table.
  */
-struct hash_table table;
+struct hash_table * table;
 
 /**
  * @function    hash_items_initialize
@@ -72,7 +74,7 @@ struct hash_item * hash_items_initialize() {
  * @param       identifier  The name of the identifier.
  * @return      An integer with the identifier's hash code.
  */
-int hash_code(char * identifier) {
+int hash_key(char * identifier) {
     int i, key;
     int length = strlen(identifier);
     double constant = 31;
@@ -102,11 +104,11 @@ int hash_index(int key) {
 void hash_table_initialize() {
     table = (struct hash_table *)calloc(1, sizeof(struct hash_table));
     table->size = 0;
-    table->items = hash_table_items_initialize();
+    table->items = hash_items_initialize();
 }
 
 /**
- * @function    hash_table_is_full
+ * @function    hash_table_full
  * @abstract    Simple function returning the occupancy of the table.
  * @return      Whether the hash table has exhausted its storage.
  */
@@ -139,10 +141,10 @@ void hash_table_print() {
  * @discussion  Implements a linear probing system.
  * @param       identifier  Name of the identifier.
  * @param       type        Type of the identifier.
- * @param       value       Numeric value of the identifier.
+ * @return      True if insertion was successful.
  */
-void hash_table_insert(char * identifier, int type, double value) {
-    if (hash_table_is_full()) return;
+bool hash_table_insert(char * identifier, int type) {
+    if (hash_table_full()) return false;
 
     int key = hash_key(identifier);
     int index = hash_index(key);
@@ -151,10 +153,28 @@ void hash_table_insert(char * identifier, int type, double value) {
         index ++;
         if (index >= TABLE_SIZE) index = 0;
     }
-    struct hash_item item = {key, type, value, identifier};
+    struct hash_item item = {key, type, 0, identifier};
     table->items[index] = item;
     table->size ++;
+    return true;
 }
+
+/**
+ * @function    hash_table_assign
+ * @abstract    Inserts a struct hash item into the table.
+ * @discussion  Implements a linear probing system.
+ * @param       identifier  Name of the identifier.
+ * @param       value       Numeric value of the identifier.
+ * @return      True if assignment was successful.
+ */
+bool hash_table_assign(char * identifier, double value) {
+    int index = hash_table_search(identifier);
+    if (!(index >= 0)) return false;
+
+    table->items[index].value == value;
+    return true;
+}
+
 
 /**
  * @function    hash_table_search
@@ -174,6 +194,19 @@ int hash_table_search(char * identifier) {
         if (index >= TABLE_SIZE) index = 0;
         if (index == looped) break;
     } return -1;
+}
+
+/**
+ * @function    hash_table_value
+ * @abstract    Returns the value found in the hash item. Zero if not found.
+ * @param       identifier  Name of the identifier.
+ * @return      Numeric value of the identifier if found, zero otherwise.
+ */
+double hash_table_value(char * identifier) {
+    int index = hash_table_search(identifier);
+    if (!(index >= 0)) return 0;
+
+    return table->items[index].value;
 }
 
 /**

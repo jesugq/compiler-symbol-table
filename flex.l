@@ -1,7 +1,7 @@
 %{
 // Imports
-// #include <stdlib.h>
-// #include <string.h>
+#include <stdlib.h>
+#include <string.h>
 #include "bison.tab.h"
 
 // Declarations
@@ -41,7 +41,7 @@ DIGIT [0-9]
 "<-"        { left_value_reserved(OPT_ASSIGN); return OPT_ASSIGN; }
 "~"         { left_value_reserved(OPT_NEGATIVE); return OPT_NEGATIVE; }
 
-"\n"        { yylineno++ }
+"\n"        { yylineno++; }
 
 {DIGIT}+                    { left_value_numeric(); return VAL_INTEGER; }
 {DIGIT}*.{DIGIT}+           { left_value_numeric(); return VAL_FLOAT; }
@@ -54,7 +54,7 @@ DIGIT [0-9]
  * @param       code    Code of the terminal.
  */
 void left_value_reserved(int code) {
-    yylval.reserved = reserved;
+    yylval.reserved = code;
 }
 
 /**

@@ -1,7 +1,7 @@
 %{
 // Imports
-// #include <stdio.h>
-// #include <stdbool.h>
+#include <stdio.h>
+#include <stdbool.h>
 #include "table.c"
 
 #define TYPE_INTEGER 0
@@ -19,27 +19,25 @@ extern char * yytext;
 extern int yylex();
 extern int yyerror(char const *);
 
-// Hash table externals
-extern struct hash_table table;
-
 // Declarations
-bool verify_arguments(int, char *);
+bool verify_arguments(int, char * []);
 bool verify_files(FILE *, char *);
 bool evaluate_to_zero(double);
 bool evaluate_with_operator(double, double, int);
 bool evaluate_identifier_exists(char *);
 void execute_print_expression(double);
 void execute_identifier_insert(char *, int);
-bool error_identifier_repeated(char *);
+void execute_identifier_assign(char *, double);
+double get_identifier_value(char *);
+void error_identifier_repeated(char *);
 void error_identifier_missing(char *);
-bool error_identifier_mismatched(char *, int);
-int main(int, char *)
+void error_identifier_mismatched(char *, int);
 %}
 
 %union {
     int reserved;
     int type;
-    bool boolean;
+    int boolean;
     double numeric;
     char * string;
 }
@@ -69,7 +67,7 @@ decls
 ;
 dec
     : WRD_VAR VAL_IDENTIFIER OPT_COLON tipo {
-        if (!evaluate_identifier_exists($2))
+        if (evaluate_identifier_exists($2))
             execute_identifier_insert($2, $4);
         else {
             error_identifier_repeated($2); YYERROR;
@@ -78,10 +76,10 @@ dec
 ;
 tipo
     : WRD_INT {
-        yylvalue.type = TYPE_INTEGER;
+        yylval.type = TYPE_INTEGER;
     }
     | WRD_FLOAT {
-        yylvalue.type = TYPE_FLOAT;
+        yylval.type = TYPE_FLOAT;
     }
 ;
 opt_stmts
@@ -94,9 +92,8 @@ stmt_lst
 ;
 stmt
     : VAL_IDENTIFIER OPT_ASSIGN expr {
-        if (!evaluate_identifier_exists($1))
-            if (!execute_identifier_assign($1, $3))
-                error_identifier_mismatched($1, $3); YYERROR;
+        if (evaluate_identifier_exists($1))
+            execute_identifier_assign($1, $3);
         else {
             error_identifier_missing($1); YYERROR;
         }
@@ -123,10 +120,10 @@ stmt
 ;
 expression
     : expr {
-        yylvalue.boolean = evaluate_to_zero($1);
+        yylval.boolean = evaluate_to_zero($1);
     }
     | expr relop expr {
-        yylvalue.boolean = evalaute_with_operator($1, $3, $2);
+        yylval.boolean = evaluate_with_operator($1, $3, $2);
     }
 ;
 expr
@@ -155,7 +152,11 @@ factor
         yylval.numeric = $2;
     }
     | VAL_IDENTIFIER {
-        yylval.numeric = hash_table_item_double_value($1);
+        if (!evaluate_identifier_exists($1))
+            yylval.numeric = get_identifier_value($1);
+        else {
+            error_identifier_missing($1); YYERROR;
+        }
     }
     | VAL_INTEGER
     | VAL_FLOAT
@@ -194,7 +195,7 @@ bool verify_arguments(int argc, char * argv[]) {
     if (argc < 2) {
         fprintf(stderr, "\nNo file argument was provided.\n");
         return false;
-    } else if (arg > 2) {
+    } else if (argc > 2) {
         fprintf(stdout, "\nToo many arguments used. using '%s'\n", argv[1]);
         return true;
     } else return true;
@@ -250,7 +251,7 @@ bool evaluate_with_operator(double one, double two, int operator) {
  * @return      True if the identifier exists in the symbol table.
  */
 bool evaluate_identifier_exists(char * identifier) {
-    return hash_table_search(identifier);
+    return hash_table_search(identifier) >= 0;
 }
 
 /**
@@ -260,6 +261,36 @@ bool evaluate_identifier_exists(char * identifier) {
  */
 void execute_print_expression(double num) {
     fprintf(stdout, "%f", num);
+}
+
+/**
+ * @function    execute_identifier_insert
+ * @abstract    Calls the hash table to insert a hash item.
+ * @param       identifier  Name of the identifier.
+ * @param       type        Type of the identifier.
+ */
+void execute_identifier_insert(char * identifier, int type) {
+    hash_table_insert(identifier, type);
+}
+
+/**
+ * @function    execute_identifier_assign
+ * @abstract    Calls the hash table to assign a value to a hash item.
+ * @param       identifier  Name of the identifier.
+ * @param       value       Numeric value of the identifier.
+ */
+void execute_identifier_assign(char * identifier, double value) {
+    hash_table_assign(identifier, value);
+}
+
+/**
+ * @function    get_identifier_value
+ * @abstract    Calls the hash table to return the hash item's value.
+ * @param       identifier  Name of the identifier.
+ * @return      Numeric value of the identifier.
+ */
+double get_identifier_value(char * identifier) {
+    return hash_table_value(identifier);
 }
 
 /**
@@ -298,14 +329,17 @@ void error_identifier_mismatched(char * identifier, int type) {
     /*  */printf("Printing an error\n");
     char error[1000] = "variable ";
     char isnot[] = "is not of type: ";
+    char integer_item[] = "int";
+    char float_item[] = "float";
+    char unknown_item[] = "unknown";
+
     strcat(error, identifier);
     strcat(error, isnot);
     switch (type) {
-        case TYPE_INTEGER:  char text[] = "integer"; break;
-        case TYPE_FLOAT:    char text[] = "float"; break;
-        default:            char text[] = "any"; break;
+        case TYPE_INTEGER:  strcat(error, integer_item); break;
+        case TYPE_FLOAT:    strcat(error, float_item); break;
+        default:            strcat(error, unknown_item); break;
     }
-    strcat(error, text);
     /*  */printf("Error created without crashing!\n");
     yyerror(error);
 }
@@ -322,4 +356,15 @@ int main(int argc, char * argv[]) {
     if (!verify_arguments(argc, argv)) return 1;
     yyin = fopen(argv[1], "r");
     if (!verify_file(yyin, argv[1])) return 1;
+
+    // Execution of the parser and symbol table.
+    hash_table_initialize();
+    yyparse();
+    hash_table_print();
+    hash_table_terminate();
+
+    // Exiting and closing the file.
+    fclose(yyin);
+    fprintf(stdout, "\n");
+    return 0;
 }
