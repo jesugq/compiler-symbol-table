@@ -1,0 +1,8 @@
+var x: int
+begin
+    if ( 0 < 1 ) x<-0;
+    if ( 0 > 1 ) x<-1;
+    if ( 0 = 1 ) x<-2;
+    if ( 0 <= 1 ) x<-3;
+    if ( 0 >= 1 ) x<-4
+end

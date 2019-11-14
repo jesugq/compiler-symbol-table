@@ -1,0 +1,10 @@
+var x: int;
+var y: int
+begin
+    ifelse (x)
+        x <- 1
+        y <- 2;
+    ifelse (1 < 0)
+        x <- 2
+        y <- 2
+end

@@ -1,0 +1,5 @@
+var x: float
+begin
+    x <- 5;
+    read x
+end
