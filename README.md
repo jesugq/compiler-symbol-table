@@ -6,6 +6,19 @@ Identifiers, ( **id** ), and numbers, ( **numint** and **numfloat** ), have to b
 
 Input to the parser is a text file, whose name has to be given to the parser as part of the command line in the console. The output should be a print out of the symbol table in case of a correct program, or an error message, containing the line number where the error is locatad, if a syntax error is encountered by the parser. In this particular case, if a variable name is used and has not been declared previously in the program, or if a variable name is declared more than once, an error has to be reported.
 
+## Compilation
+To run this assignment, use the following commands. A test file must be supplied to the executable file.
+```bash
+lex flex.l
+bison -d bison.y
+gcc lex.yy.c bison.tab.c -lfl -lm -o run.out
+./run.out file1.txt
+
+# Or the short version
+lex flex.l && bison -d bison.y && gcc lex.yy.c bison.tab.c -lfl -lm -o run.out
+./run.out file1.txt
+```
+
 ## Grammar
 The following is the grammar provided by the professor, which is implemented in this, and further assignments.
 ```c
