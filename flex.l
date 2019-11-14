@@ -44,7 +44,7 @@ DIGIT [0-9]
 "\n"        { yylineno++; }
 
 {DIGIT}+                    { left_value_numeric(); return VAL_INTEGER; }
-{DIGIT}*.{DIGIT}+           { left_value_numeric(); return VAL_FLOAT; }
+{DIGIT}*"."{DIGIT}+         { left_value_numeric(); return VAL_FLOAT; }
 {ALPHA}({ALPHA}|{DIGIT})*   { left_value_string(); return VAL_IDENTIFIER; }
 %%
 

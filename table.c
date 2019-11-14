@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 // Definitions
-#define TABLE_SIZE 30
+#define TABLE_SIZE 20
 #define TYPE_INTEGER 1
 #define TYPE_FLOAT 2
 
@@ -128,7 +128,7 @@ void hash_table_print() {
     
     fprintf(stdout, "\n");
     for (i=0; i<TABLE_SIZE; i++) {
-        fprintf(stdout, "table[%2d] = {%d, %s, %s, %1.0f}\n",
+        fprintf(stdout, "table[%2d] = {%d, %s, %s, %1.2f}\n",
         i, table->items[i].key,
         table->items[i].type == TYPE_INTEGER ? integer_item :
             (table->items[i].type == TYPE_FLOAT ? float_item : none_item),
@@ -206,7 +206,6 @@ int hash_table_search(char * identifier) {
  */
 double hash_table_value(char * identifier) {
     int index = hash_table_search(identifier);
-    printf("\nIndex for identifier '%s' is %d of value: %f\n", identifier, index, table->items[index].value);
     if (!(index >= 0)) return 0;
 
     return table->items[index].value;

@@ -1,6 +1,10 @@
-var x: int;
-var y: int
+var a: int;
+var b: int;
+var c: float;
+var d: float
 begin
-    x <- 10;
-    y <- x
+    a <- 10;
+    b <- a;
+    c <- 15.5;
+    d <- c
 end

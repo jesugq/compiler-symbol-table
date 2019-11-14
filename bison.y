@@ -26,6 +26,7 @@ bool evaluate_to_zero(double);
 bool evaluate_with_operator(double, double, int);
 bool evaluate_identifier_exists(char *);
 void execute_print_expression(double);
+void execute_read_identifier(char *);
 void execute_identifier_insert(char *, int);
 void execute_identifier_assign(char *, double);
 double get_identifier_value(char *);
@@ -94,8 +95,9 @@ stmt_lst
 ;
 stmt
     : VAL_IDENTIFIER OPT_ASSIGN expr {
-        if (evaluate_identifier_exists($1))
+        if (evaluate_identifier_exists($1)){
             execute_identifier_assign($1, $3);
+        }
         else {
             error_identifier_missing($1); YYERROR;
         }
@@ -113,7 +115,7 @@ stmt
         // Not yet implemented.
     }
     | WRD_READ VAL_IDENTIFIER {
-        // I'm not sure what this should do.
+        execute_read_identifier($2);
     }
     | WRD_PRINT expr {
         execute_print_expression($2);
@@ -122,40 +124,44 @@ stmt
 ;
 expression
     : expr {
-        yylval.boolean = evaluate_to_zero($1);
+        $$ = evaluate_to_zero($1);
     }
     | expr relop expr {
-        yylval.boolean = evaluate_with_operator($1, $3, $2);
+        $$ = evaluate_with_operator($1, $3, $2);
     }
 ;
 expr
     : expr OPT_PLUS term {
-        yylval.numeric = $1 + $2;
+        $$ = $1 + $2;
     }
     | expr OPT_MINUS term {
-        yylval.numeric = $1 - $2;
+        $$ = $1 - $2;
     }
     | signo term {
-        yylval.numeric = $2 * -1;
+        $$ = $2 * -1;
     }
-    | term
+    | term {
+        $$ = $1;
+    }
 ;
 term
     : term OPT_ASTERISK factor {
-        yylval.numeric = $1 * $2;
+        $$ = $1 * $2;
     }
     | term OPT_SLASH factor {
-        yylval.numeric = $1 / $2;
+        $$ = $1 / $2;
     }
-    | factor
+    | factor {
+        $$ = $1;
+    }
 ;
 factor
     : OPT_OPENS expr OPT_CLOSES {
-        yylval.numeric = $2;
+        $$ = $2;
     }
     | VAL_IDENTIFIER {
         if (evaluate_identifier_exists($1))
-            yylval.numeric = get_identifier_value($1);
+            $$ = get_identifier_value($1);
         else {
             error_identifier_missing($1); YYERROR;
         }
@@ -195,7 +201,7 @@ int yyerror(char const * error) {
  */
 bool verify_arguments(int argc, char * argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "\nNo file argument was provided.\n");
+        fprintf(stderr, "\nNo file argument was provided.\n\n");
         return false;
     } else if (argc > 2) {
         fprintf(stdout, "\nToo many arguments used. using '%s'\n", argv[1]);
@@ -212,7 +218,7 @@ bool verify_arguments(int argc, char * argv[]) {
  */
 bool verify_file(FILE * file, char * arge) {
     if (file == NULL) {
-        fprintf(stderr, "\nFailed to open file '%s',\n", arge);
+        fprintf(stderr, "\nFailed to open file '%s',\n\n", arge);
         return false;
     } else return true;
 }
@@ -266,6 +272,15 @@ void execute_print_expression(double num) {
 }
 
 /**
+ * @function    execute_read_identifier
+ * @abstract    Prints the name of an identifier.
+ * @param       identifier  Name of the identifier.
+ */
+void execute_read_identifier(char * identifier) {
+    fprintf(stdout, "\nIdentifier is: %s", identifier);
+}
+
+/**
  * @function    execute_identifier_insert
  * @abstract    Calls the hash table to insert a hash item.
  * @param       identifier  Name of the identifier.
@@ -287,7 +302,6 @@ void execute_identifier_insert(char * identifier, int type) {
  * @param       value       Numeric value of the identifier.
  */
 void execute_identifier_assign(char * identifier, double value) {
-    printf("\nAssignment was: %f\n", value);
     hash_table_assign(identifier, value);
 }
 
@@ -308,7 +322,6 @@ double get_identifier_value(char * identifier) {
 void success_parse() {
     fprintf(stdout, "\nFile accepted.\n");
 }
-
 /**
  * @function    error_identifier_repeated
  * @abstract    Calls yerror with reason: Identifier was already declared.
