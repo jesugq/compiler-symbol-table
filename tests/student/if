@@ -1,0 +1,7 @@
+var x: int
+begin
+    if (x)
+        x <- 1;
+    if (1 < 0)
+        x <- 2 
+end

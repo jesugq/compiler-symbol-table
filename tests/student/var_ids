@@ -1,0 +1,6 @@
+var a: int;
+var b: float;
+var c: int;
+var d: float
+begin
+end

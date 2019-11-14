@@ -1,0 +1,17 @@
+var x : int;
+var y : int
+begin
+   read x;
+   read y;
+   ifelse (x < y)
+   begin
+      x <- x + 1;
+      y <- x + 2*x
+   end
+   begin
+      x <- x * 2;
+      y <- (2+1) * (y + x)
+   end;
+   print y;
+   print x
+end

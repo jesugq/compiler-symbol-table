@@ -1,0 +1,8 @@
+var x: int;
+var y: int;
+var z: int
+begin
+    x <- ( (20 / 2) + 10 );
+    y <- (x) + 5;
+    z <- 5.5
+end

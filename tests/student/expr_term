@@ -1,0 +1,12 @@
+var a: int;
+var b: int;
+var c: int;
+var d: int;
+var e: int
+begin
+    a <- 1 + 2;
+    b <- 1 - 2;
+    c <- ~5;
+    d <- 1 * 2;
+    e <- 1 / 2
+end
