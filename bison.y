@@ -79,10 +79,10 @@ dec
 ;
 tipo
     : WRD_INT {
-        yylval.type = TYPE_INTEGER;
+        $$ = TYPE_INTEGER;
     }
     | WRD_FLOAT {
-        yylval.type = TYPE_FLOAT;
+        $$ = TYPE_FLOAT;
     }
 ;
 opt_stmts
@@ -132,10 +132,10 @@ expression
 ;
 expr
     : expr OPT_PLUS term {
-        $$ = $1 + $2;
+        $$ = $1 + $3;
     }
     | expr OPT_MINUS term {
-        $$ = $1 - $2;
+        $$ = $1 - $3;
     }
     | signo term {
         $$ = $2 * -1;
@@ -146,10 +146,10 @@ expr
 ;
 term
     : term OPT_ASTERISK factor {
-        $$ = $1 * $2;
+        $$ = $1 * $3;
     }
     | term OPT_SLASH factor {
-        $$ = $1 / $2;
+        $$ = $1 / $3;
     }
     | factor {
         $$ = $1;
@@ -166,15 +166,19 @@ factor
             error_identifier_missing($1); YYERROR;
         }
     }
-    | VAL_INTEGER
-    | VAL_FLOAT
+    | VAL_INTEGER {
+        $$ = $1;
+    }
+    | VAL_FLOAT {
+        $$ = $1;
+    }
 ;
 relop
-    : OPT_LESS      { yylval.type = TYPE_LESS_THAN; }
-    | OPT_GREATER   { yylval.type = TYPE_GREATER_THAN; }
-    | OPT_EQUALS    { yylval.type = TYPE_EQUALS; }
-    | OPT_LTE       { yylval.type = TYPE_LESS_THAN_EQUALS; }
-    | OPT_GTE       { yylval.type = TYPE_GREATER_THAN_EQUALS; }
+    : OPT_LESS      { $$ = TYPE_LESS_THAN; }
+    | OPT_GREATER   { $$ = TYPE_GREATER_THAN; }
+    | OPT_EQUALS    { $$ = TYPE_EQUALS; }
+    | OPT_LTE       { $$ = TYPE_LESS_THAN_EQUALS; }
+    | OPT_GTE       { $$ = TYPE_GREATER_THAN_EQUALS; }
 ;
 signo
     : OPT_NEGATIVE
@@ -277,7 +281,7 @@ void execute_print_expression(double num) {
  * @param       identifier  Name of the identifier.
  */
 void execute_read_identifier(char * identifier) {
-    fprintf(stdout, "\nIdentifier is: %s", identifier);
+    fprintf(stdout, "\nIdentifier is: %s\n", identifier);
 }
 
 /**
@@ -287,11 +291,6 @@ void execute_read_identifier(char * identifier) {
  * @param       type        Type of the identifier.
  */
 void execute_identifier_insert(char * identifier, int type) {
-    switch (type) {
-        case WRD_INT: type = TYPE_INTEGER; break;
-        case WRD_FLOAT: type = TYPE_FLOAT; break;
-        default: type = 0; break;
-    }
     hash_table_insert(identifier, type);
 }
 
