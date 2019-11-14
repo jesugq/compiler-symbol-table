@@ -5,7 +5,7 @@
 #include "bison.tab.h"
 
 // Declarations
-void left_value_reserved(int code);
+void left_value_reserved(int);
 void left_value_numeric();
 void left_value_string();
 %}
