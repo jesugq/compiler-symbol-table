@@ -82,12 +82,14 @@ The parser needs to know which value is being handled at a time, so it manages a
 ```c
 %union {
     int reserved;       // The integer code of the terminal.
+    int type;           // The type of operation, non-terminal.
+    bool boolean;       // The result of an expression non-terminal.
     double numeric;     // The numeric value of the terminal.
     char * string       // The string value of the terminal.
 }
 ```
 
-Terminals take a left value of one of these two types, and return them when called using Bison's $X handler. 
+Terminals take a left value of one of the three terminal, and return them when called using Bison's $X handler. 
 
 ```c
 // Reserved Words
@@ -117,7 +119,7 @@ token<value_identifier> VAL_IDENTIFIER
 Unlike all terminals, some non-terminals do not have to handle being called, such as the case of the first non-terminal, prog. The terminals which do not have a pre-defined type (and are defaulted to int) are the following.
 
 ```c
-type<int>
+type<reserved>
     prog
     opt_decls decls dec
     opt_stmts stmt_lst stmt
@@ -129,23 +131,23 @@ However, some non-terminals are called when being assigned to a terminal value h
 ```c
 // Non-terminal tipo determines the type of variable that the hash table will
 // store, returning a #defined value.
-type<int> tipo
+type<type> tipo
 
 // Non-terminal expression returns true or false when using the WRD_IF,
 // WRD_IFELSE or WRD_WHILE terminals.
-type<bool> expression
+type<boolean> expression
 
 // Non-terminal expr does an operation of sum or subtraction, and can also make the value negative. It is handled as a double, for the reason state in factor.
-type<string> expr
+type<numeric> expr
 
 // Non-terminal term does an operation of multiplcation or division with the factor and the preceding term. It is handled as a double, for the reason stated in factor.
-type<double> term
+type<numeric> term
 
 // Non-terminal factor gets the value of either reading an integer/float, or by calling the value from the hash table. It is handled as a double, since it can handle both floats and integers.
-type<double> factor
+type<numeric> factor
 
 // Non-terminal relop determines the type of operation that the non-terminal expression will use, returning a #defined value.
-type<int> relop
+type<type> relop
 ```
 
 ## Hash Table
