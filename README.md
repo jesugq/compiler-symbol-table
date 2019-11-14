@@ -36,10 +36,10 @@ stmt_lst
     | stmt
 
 stmt
-    : VAL_IDENTIFIER OPT_ASSIGNMENT expr
-    | WRD_IF OPT_OPEN expression OPT_CLOSE stmt
-    | WRD_IFELSE OPT_OPEN expression OPT_CLOSE stmt stmt
-    | WRD_WHILE OPT_OPEN expression OPT_CLOSE stmt
+    : VAL_IDENTIFIER OPT_ASSIGN expr
+    | WRD_IF OPT_OPENS expression OPT_CLOSES stmt
+    | WRD_IFELSE OPT_OPENS expression OPT_CLOSES stmt stmt
+    | WRD_WHILE OPT_OPENS expression OPT_CLOSES stmt
     | WRD_READ VAL_IDENTIFIER
     | WRD_PRINT expr
     | BEGINS opt_stmts ENDS
@@ -60,7 +60,7 @@ term
     | factor
 
 factor
-    : OPT_OPEN expr OPT_CLOSE
+    : OPT_OPENS expr OPT_CLOSES
     | VAL_IDENTIFIER
     | VAL_INTEGER
     | VAL_FLOAT
@@ -81,9 +81,9 @@ The parser needs to know which value is being handled at a time, so it manages a
 
 ```c
 %union {
-    int reserved;               // The integer code of the terminal.
-    double numeric_value;       // The numeric value of the terminal.
-    char * string_value         // The string value of the terminal.
+    int reserved;       // The integer code of the terminal.
+    double numeric;     // The numeric value of the terminal.
+    char * string       // The string value of the terminal.
 }
 ```
 
@@ -100,16 +100,16 @@ token<reserved>
 // Reserved Operators
 // Returns their integer code using the reserved left value.
 token<reserved>
-    OPT_COLON OPT_SEMICOLON OPT_OPEN OPT_CLOSE
+    OPT_COLON OPT_SEMICOLON OPT_OPENS OPT_CLOSES
     OPT_PLUS OPT_MINUS OPT_ASTERISK OPT_SLASH
     OPT_LESS OPT_GREATER OPT_EQUALS OPT_LTE OPT_GTE
-    OPT_ASSIGNMENT OPT_NEGATIVE
+    OPT_ASSIGN OPT_NEGATIVE
 
 // Values
-// Returns their value using the numeric_value left value.
+// Returns their value using the numeric left value.
 token<value_integer> VAL_INTEGER
 token<value_float> VAL_FLOAT
-// Returns their value using the string_value left value.
+// Returns their value using the string left value.
 token<value_identifier> VAL_IDENTIFIER
 ```
 
