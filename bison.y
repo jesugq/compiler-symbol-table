@@ -2,7 +2,7 @@
 // Imports
 // #include <stdio.h>
 // #include <stdbool.h>
-#include "hash_table.c"
+#include "table.c"
 
 #define TYPE_INTEGER 0
 #define TYPE_FLOAT 1
