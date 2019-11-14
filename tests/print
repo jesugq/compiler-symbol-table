@@ -1,5 +1,0 @@
-var x: float
-begin
-    x <- 5;
-    print x
-end

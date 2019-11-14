@@ -1,6 +1,0 @@
-var x: int
-begin
-    begin
-        x <- 5
-    end
-end
