@@ -187,4 +187,4 @@ In this assignment, operations regarding some of the grammar were not implemente
 * Grammar's 'if' only executing its 'stmt' if the 'expression' was true.
 * Grammar's 'ifelse' executing its first 'stmt' if the 'expresion' was true and the second 'stmt' otherwise.
 * Grammar's 'while' executing its 'stmt' until 'expression' became false.
-* The values passed being handled as their original type, int or float. All values in this assignment are handled as doubles for simplicity, since the behavior expected when using an operation with both integer and float (e.g. `var x: int;` combined with `x <- 5.75`) is unclear yet.
+* The values passed being handled as their original type, int or float. All values in this assignment are handled as doubles for simplicity, type checking will be implemented in the next assignment.
