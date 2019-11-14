@@ -29,6 +29,7 @@ void execute_print_expression(double);
 void execute_identifier_insert(char *, int);
 void execute_identifier_assign(char *, double);
 double get_identifier_value(char *);
+void success_parse();
 void error_identifier_repeated(char *);
 void error_identifier_missing(char *);
 void error_identifier_mismatched(char *, int);
@@ -55,7 +56,9 @@ void error_identifier_mismatched(char *, int);
 
 %%
 prog
-    : opt_decls WRD_BEGINS opt_stmts WRD_ENDS
+    : opt_decls WRD_BEGINS opt_stmts WRD_ENDS {
+        success_parse();
+    }
 ;
 opt_decls
     : decls
@@ -291,6 +294,14 @@ void execute_identifier_assign(char * identifier, double value) {
  */
 double get_identifier_value(char * identifier) {
     return hash_table_value(identifier);
+}
+
+/**
+ * @function    success_parse
+ * @abstract    Prints a success message.
+ */
+void success_parse() {
+    fprintf(stdout, "\nFile accepted.\n");
 }
 
 /**
