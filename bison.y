@@ -15,6 +15,8 @@ extern int yyerror(char const *);
 extern struct hash_table table;
 
 // Declarations
+bool verify_arguments(int, char *);
+int main(int, char *)
 %}
 
 %union {
@@ -106,3 +108,59 @@ signo
     : OPT_NEGATIVE
 ;
 %%
+
+/**
+ * @function    yyerror
+ * @abstract    Overrides yyerror to print both the line and the error.
+ * @param       error   Error message.
+ * @return      Error code, only received by yylex.
+ */
+int yyerror(char const * error) {
+    fprintf(stderr, "\n%s found after readin '%s' at line %d.\n",
+        error, yytext, yylineno
+    );
+}
+
+/**
+ * @function    verify_arguments
+ * @abstract    Checks the argument count, returns if a filename was provided.
+ * @param       argc    Argument count.
+ * @return      True if at least one argument was provided.
+ */
+bool verify_arguments(int argc, char * argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "\nNo file argument was provided.\n");
+        return false;
+    } else if (arg > 2) {
+        fprintf(stdout, "\nToo many arguments used. using '%s'\n", argv[1]);
+        return true;
+    } else return true;
+}
+
+/**
+ * @function    verify_file
+ * @abstract    Verifies and returns if the file was correctly opened.
+ * @param       file    File pointer to verify.
+ * @param       arge    Argument element.
+ * @return      True if the file was opened correctly.
+ */
+bool verify_file(FILE * file, char * arge) {
+    if (file == NULL) {
+        fprintf(stderr, "\nFailed to open file '%s',\n", arge);
+        return false;
+    } else return true;
+}
+
+/**
+ * @function    main
+ * @abstract    Runtime of this program. Executes yyparse and hash table init.
+ * @param       argc    Argument count.
+ * @param       argv    Argument values.
+ * @return      Runtime code, zero for OK.
+ */
+int main(int argc, char * argv[]) {
+    // Argument and file verification
+    if (!verify_arguments(argc, argv)) return 1;
+    yyin = fopen(argv[1], "r");
+    if (!verify_file(yyin, argv[1])) return 1;
+}
