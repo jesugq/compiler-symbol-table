@@ -42,7 +42,7 @@ stmt
     | WRD_WHILE OPT_OPENS expression OPT_CLOSES stmt
     | WRD_READ VAL_IDENTIFIER
     | WRD_PRINT expr
-    | BEGINS opt_stmts ENDS
+    | WRD_BEGINS opt_stmts WRD_ENDS
 
 expression
     : expr
@@ -66,11 +66,11 @@ factor
     | VAL_FLOAT
 
 relop
-    : LESS
-    | GREATER
-    | EQUALS
-    | LTE
-    | GTE
+    : OPT_LESS
+    | OPT_GREATER
+    | OPT_EQUALS
+    | OPT_LTE
+    | OPT_GTE
 
 signo
     : OPT_NEGATIVE
@@ -116,10 +116,10 @@ token<value_identifier> VAL_IDENTIFIER
 ```
 
 ## Non terminal types
-Unlike all terminals, some non-terminals do not have to handle being called, such as the case of the first non-terminal, prog. The terminals which do not have a pre-defined type (and are defaulted to int) are the following.
+Unlike all terminals, some non-terminals do not have to handle being called, such as the case of the first non-terminal, prog, or terminals such as opt_decls which can be empty. The terminals which do not have a pre-defined type are the following.
 
 ```c
-type<reserved>
+type<none>
     prog
     opt_decls decls dec
     opt_stmts stmt_lst stmt
