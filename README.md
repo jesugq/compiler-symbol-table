@@ -20,7 +20,7 @@ lex flex.l && bison -d bison.y && gcc lex.yy.c bison.tab.c -lfl -lm -o run.out
 ```
 
 ## Grammar
-The following is the grammar provided by the professor, which is implemented in this, and further assignments.
+The following is the grammar provided by the professor, which is implemented in this, and will be expanded upon in further assignments.
 ```c
 prog
     : opt_decls WRD_BEGINS opt_stmts WRD_ENDS
@@ -90,7 +90,7 @@ signo
 ```
 
 ## Terminal types
-The parser needs to know which value is being handled at a time, so it manages a union provided by Bison that handles the following types of values. It's useful to note that unions manage the same position in memory, so any given terminal can be of only one type.
+The parser needs to know which value is being handled at a time, so it manages a union, that handles the following types of values. As mentioned in class, only one field can be used at a time.
 
 ```c
 %union {
@@ -102,7 +102,7 @@ The parser needs to know which value is being handled at a time, so it manages a
 }
 ```
 
-Terminals take a left value of one of the three terminal, and return them when called using Bison's $X handler. 
+Terminals return a left value with either a reserved terminal code, the numerical value of the integer or floating point read, or the string value of the identifier read. These can be called using Bison's $X handler.
 
 ```c
 // Reserved Words
@@ -129,7 +129,7 @@ token<value_identifier> VAL_IDENTIFIER
 ```
 
 ## Non terminal types
-Unlike all terminals, some non-terminals do not have to handle being called, such as the case of the first non-terminal, prog, or terminals such as opt_decls which can be empty. The terminals which do not have a pre-defined type are the following.
+Unlike all terminals, some non-terminals do not have to handle being called, such as the case of the first non-terminal, prog, or terminals such as opt_decls which can be epsilon. The terminals which do not have a pre-defined type are the following.
 
 ```c
 type<none>
@@ -139,27 +139,25 @@ type<none>
     signo
 ```
 
-However, some non-terminals are called when being assigned to a terminal value held inside a non-terminal called previously, such as the non-terminal tipo, which is used to give a type to the identifier in dec. The non terminals used are the following.
+However, some non-terminals can call its nested non-terminals and ask them for a value. One non-terminal that returns a value is tipo, which is used to give a type to the identifier in dec. The non terminals which have a pre-defined type are the following.
 
 ```c
-// Non-terminal tipo determines the type of variable that the hash table will
-// store, returning a #defined value.
+// Non-terminal tipo determines the type of variable that the hash table will store, returning an integer code.
 type<type> tipo
 
-// Non-terminal expression returns true or false when using the WRD_IF,
-// WRD_IFELSE or WRD_WHILE terminals.
+// Non-terminal expression returns true or false to non-terminal stmt when using WRD_IF WRD_IFELSE or WRD_WHILE terminals.
 type<boolean> expression
 
-// Non-terminal expr does an operation of sum or subtraction, and can also make the value negative. It is handled as a double, for the reason state in factor.
+// Non-terminal expr does an operation of sum or subtraction, and can also make the value negative. It is handled as a double, for the reason stated in factor.
 type<numeric> expr
 
-// Non-terminal term does an operation of multiplcation or division with the factor and the preceding term. It is handled as a double, for the reason stated in factor.
+// Non-terminal term does an operation of multiplcation or division. It is handled as a double, for the reason stated in factor.
 type<numeric> term
 
-// Non-terminal factor gets the value of either reading an integer/float, or by calling the value from the hash table. It is handled as a double, since it can handle both floats and integers.
+// Non-terminal factor gets the value of either reading an integer/float, or by calling the value from the hash table when reading an identifier. For simplicity's sake, it is handled as a double, which allows for both integer and floating point arithmetic.
 type<numeric> factor
 
-// Non-terminal relop determines the type of operation that the non-terminal expression will use, returning a #defined value.
+// Non-terminal relop determines the type of operation that the non-terminal expression will use, returning an integer code.
 type<type> relop
 ```
 
@@ -183,3 +181,10 @@ typedef struct hash_table {
     struct hash_item * items;
 } hash_table;
 ```
+
+## Missing features
+In this assignment, operations regarding some of the grammar were not implemented. These were the following.
+* Grammar's 'if' only executing its 'stmt' if the 'expression' was true.
+* Grammar's 'ifelse' executing its first 'stmt' if the 'expresion' was true and the second 'stmt' otherwise.
+* Grammar's 'while' executing its 'stmt' until 'expression' became false.
+* The values passed being handled as their original type, int or float. All values in this assignment are handled as doubles for simplicity, since the behavior expected when using an operation with both integer and float (e.g. `var x: int;` combined with `x <- 5.75`) is unclear yet.
