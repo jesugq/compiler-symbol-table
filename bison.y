@@ -4,13 +4,13 @@
 #include <stdbool.h>
 #include "table.c"
 
-#define TYPE_INTEGER 0
-#define TYPE_FLOAT 1
-#define TYPE_LESS_THAN 2
-#define TYPE_GREATER_THAN 3
-#define TYPE_EQUALS 4
-#define TYPE_LESS_THAN_EQUALS 5
-#define TYPE_GREATER_THAN_EQUALS 6
+#define TYPE_INTEGER 1
+#define TYPE_FLOAT 2
+#define TYPE_LESS_THAN 3
+#define TYPE_GREATER_THAN 4
+#define TYPE_EQUALS 5
+#define TYPE_LESS_THAN_EQUALS 6
+#define TYPE_GREATER_THAN_EQUALS 7
 
 // Flex externals
 extern FILE * yyin;
@@ -32,7 +32,6 @@ double get_identifier_value(char *);
 void success_parse();
 void error_identifier_repeated(char *);
 void error_identifier_missing(char *);
-void error_identifier_mismatched(char *, int);
 %}
 
 %union {
@@ -70,7 +69,7 @@ decls
 ;
 dec
     : WRD_VAR VAL_IDENTIFIER OPT_COLON tipo {
-        if (evaluate_identifier_exists($2))
+        if (!evaluate_identifier_exists($2))
             execute_identifier_insert($2, $4);
         else {
             error_identifier_repeated($2); YYERROR;
@@ -155,7 +154,7 @@ factor
         yylval.numeric = $2;
     }
     | VAL_IDENTIFIER {
-        if (!evaluate_identifier_exists($1))
+        if (evaluate_identifier_exists($1))
             yylval.numeric = get_identifier_value($1);
         else {
             error_identifier_missing($1); YYERROR;
@@ -183,7 +182,7 @@ signo
  * @return      Error code, only received by yylex.
  */
 int yyerror(char const * error) {
-    fprintf(stderr, "\n%s found after readin '%s' at line %d.\n",
+    fprintf(stderr, "\n%s found after reading '%s' at line %d.\n",
         error, yytext, yylineno
     );
 }
@@ -263,7 +262,7 @@ bool evaluate_identifier_exists(char * identifier) {
  * @param       num     Double expression to print.
  */
 void execute_print_expression(double num) {
-    fprintf(stdout, "%f", num);
+    fprintf(stdout, "\nValue is: %f\n", num);
 }
 
 /**
@@ -273,6 +272,11 @@ void execute_print_expression(double num) {
  * @param       type        Type of the identifier.
  */
 void execute_identifier_insert(char * identifier, int type) {
+    switch (type) {
+        case WRD_INT: type = TYPE_INTEGER; break;
+        case WRD_FLOAT: type = TYPE_FLOAT; break;
+        default: type = 0; break;
+    }
     hash_table_insert(identifier, type);
 }
 
@@ -283,6 +287,7 @@ void execute_identifier_insert(char * identifier, int type) {
  * @param       value       Numeric value of the identifier.
  */
 void execute_identifier_assign(char * identifier, double value) {
+    printf("\nAssignment was: %f\n", value);
     hash_table_assign(identifier, value);
 }
 
@@ -310,10 +315,8 @@ void success_parse() {
  * @param       identifier  Name of the identifier.
  */
 void error_identifier_repeated(char * identifier) {
-    printf("Printing an error\n");
     char error[1000] = "variable already declared: ";
     strcat(error, identifier);
-    printf("Error created without crashing!\n");
     yyerror(error);
 }
 
@@ -323,35 +326,8 @@ void error_identifier_repeated(char * identifier) {
  * @param       identifier  Name of the identifier.
  */
 void error_identifier_missing(char * identifier) {
-    /*  */printf("Printing an error\n");
     char error[1000] = "variable not declared before: ";
     strcat(error, identifier);
-    /*  */printf("Error created without crashing!\n");
-    yyerror(error);
-}
-
-/**
- * @function    error_identifier_mismatched
- * @abstract    Calls yyerror with reason: Identifier is not of a certain type.s
- * @param       identifier  Name of the identifier.
- * @param       type        Erroneous type given to the identifier.
- */
-void error_identifier_mismatched(char * identifier, int type) {
-    /*  */printf("Printing an error\n");
-    char error[1000] = "variable ";
-    char isnot[] = "is not of type: ";
-    char integer_item[] = "int";
-    char float_item[] = "float";
-    char unknown_item[] = "unknown";
-
-    strcat(error, identifier);
-    strcat(error, isnot);
-    switch (type) {
-        case TYPE_INTEGER:  strcat(error, integer_item); break;
-        case TYPE_FLOAT:    strcat(error, float_item); break;
-        default:            strcat(error, unknown_item); break;
-    }
-    /*  */printf("Error created without crashing!\n");
     yyerror(error);
 }
 

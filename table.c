@@ -7,8 +7,8 @@
 
 // Definitions
 #define TABLE_SIZE 30
-#define TYPE_INTEGER 0
-#define TYPE_FLOAT 1
+#define TYPE_INTEGER 1
+#define TYPE_FLOAT 2
 
 // Declarations
 typedef struct hash_item hash_item;
@@ -124,12 +124,14 @@ void hash_table_print() {
     int i;
     char integer_item[] = "int";
     char float_item[] = "float";
+    char none_item[] = "none";
     
     fprintf(stdout, "\n");
     for (i=0; i<TABLE_SIZE; i++) {
-        fprintf(stdout, "table[%2d] = {%d, %s, %s, %f}\n",
+        fprintf(stdout, "table[%2d] = {%d, %s, %s, %1.0f}\n",
         i, table->items[i].key,
-        table->items[i].type == TYPE_INTEGER ? integer_item:float_item,
+        table->items[i].type == TYPE_INTEGER ? integer_item :
+            (table->items[i].type == TYPE_FLOAT ? float_item : none_item),
         table->items[i].identifier, table->items[i].value
         );
     }
@@ -171,7 +173,7 @@ bool hash_table_assign(char * identifier, double value) {
     int index = hash_table_search(identifier);
     if (!(index >= 0)) return false;
 
-    table->items[index].value == value;
+    table->items[index].value = value;
     return true;
 }
 
@@ -204,6 +206,7 @@ int hash_table_search(char * identifier) {
  */
 double hash_table_value(char * identifier) {
     int index = hash_table_search(identifier);
+    printf("\nIndex for identifier '%s' is %d of value: %f\n", identifier, index, table->items[index].value);
     if (!(index >= 0)) return 0;
 
     return table->items[index].value;
