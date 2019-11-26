@@ -191,7 +191,7 @@ int hash_table_search(char * identifier) {
     int looped = index;
 
     while (table->items[index].key != 0) {
-        if (table->items[index].key = key) return index;
+        if (table->items[index].key == key) return index;
         index ++;
         if (index >= TABLE_SIZE) index = 0;
         if (index == looped) break;
